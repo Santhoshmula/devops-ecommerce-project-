@@ -4,9 +4,9 @@ pipeline {
     booleanParam(name: 'USE_MINIKUBE_LOAD', defaultValue: true, description: 'Load image into Minikube instead of Docker Hub push')
   }
   environment {
-    DOCKERHUB_REPO = "santhoshmula/devopstrainer-myrepo	"
+    DOCKERHUB_REPO = "santhoshmula/devopstrainer-myrepo"
     IMAGE_TAG = "${BUILD_NUMBER}"
-    IMAGE_NAME = ""${DOCKERHUB_REPO}:${IMAGE_TAG}""
+    IMAGE_NAME = "${DOCKERHUB_REPO}:${IMAGE_TAG}"
     K8S_DIR = "k8s"
   }
   stages {
@@ -20,10 +20,15 @@ pipeline {
       }
     }
 
-    stage('Build Image') {
+    tage('Build Image') {
       steps {
         dir('app') {
-          bat 'docker build -t %DOCKERHUB_REPO%:%BUILD_NUMBER% .'
+          // debug - remove after verifying
+          bat 'echo DOCKERHUB_REPO=%DOCKERHUB_REPO%'
+          bat 'echo IMAGE_NAME=%IMAGE_NAME%|xx'
+          bat 'dir'
+          // actual build - note quoted IMAGE_NAME
+          bat 'docker build -t "%IMAGE_NAME%" .'
         }
       }
     }
