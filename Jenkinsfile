@@ -20,7 +20,7 @@ pipeline {
       }
     }
 
-    tage('Build Image') {
+    stage('Build Image') {
       steps {
         dir('app') {
           // debug - remove after verifying
