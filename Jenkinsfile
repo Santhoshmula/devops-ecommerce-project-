@@ -25,7 +25,7 @@ pipeline {
         dir('app') {
           // debug - remove after verifying
           bat 'echo DOCKERHUB_REPO=%DOCKERHUB_REPO%'
-          bat 'echo IMAGE_NAME=%IMAGE_NAME%|xx'
+          //bat 'echo IMAGE_NAME=%IMAGE_NAME%|xx'
           bat 'dir'
           // actual build - note quoted IMAGE_NAME
           bat 'docker build -t "%IMAGE_NAME%" .'
