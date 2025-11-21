@@ -6,7 +6,7 @@ pipeline {
   environment {
     DOCKERHUB_REPO = "santhoshmula/devopstrainer-myrepo	"
     IMAGE_TAG = "${BUILD_NUMBER}"
-    IMAGE_NAME = ""${DOCKERHUB_REPO}:${IMAGE_TAG}""
+    IMAGE_NAME = "${DOCKERHUB_REPO}:${IMAGE_TAG}"
     K8S_DIR = "k8s"
   }
   stages {
