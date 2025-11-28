@@ -1,0 +1,134 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: ecommerce
+#   namespace: prod
+#   labels:
+#     app: ecommerce
+#     env: prod
+#   annotations:
+#     owner: santhosh
+#     version: "1.0"
+
+# spec:
+#   replicas: 3
+#   revisionHistoryLimit: 5
+#   progressDeadlineSeconds: 600
+
+#   selector:
+#     matchLabels:
+#       app: ecommerce
+
+#   strategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxUnavailable: 1
+#       maxSurge: 1
+
+#   template:
+#     metadata:
+#       labels:
+#         app: ecommerce
+#         tier: backend
+#       annotations:
+#         checksum/config: "xyz123"
+
+#     spec:
+#       serviceAccountName: ecommerce-sa
+#       imagePullSecrets:
+#       - name: docker-registry-cred
+
+#       containers:
+#       - name: ecommerce
+#         image: myrepo/ecommerce:1.0
+#         imagePullPolicy: IfNotPresent
+
+#         ports:
+#         - containerPort: 8080
+
+#         env:
+#         - name: ENV
+#           value: production
+
+#         envFrom:
+#         - configMapRef:
+#             name: ecommerce-config
+#         - secretRef:
+#             name: ecommerce-secret
+
+#         resources:
+#           limits:
+#             cpu: "500m"
+#             memory: "1Gi"
+#           requests:
+#             cpu: "200m"
+#             memory: "300Mi"
+
+#         livenessProbe:
+#           httpGet:
+#             path: /health
+#             port: 8080
+#           initialDelaySeconds: 10
+
+#         readinessProbe:
+#           httpGet:
+#             path: /ready
+#             port: 8080
+#           initialDelaySeconds: 5
+
+#         volumeMounts:
+#         - name: config-vol
+#           mountPath: /app/config
+
+#       initContainers:
+#       - name: wait-for-db
+#         image: busybox
+#         command: ['sh', '-c', 'until nc -z mysql 3306; do sleep 5; done']
+
+#       volumes:
+#       - name: config-vol
+#         configMap:
+#           name: ecommerce-config
+
+#       affinity:
+#         nodeAffinity:
+#           requiredDuringSchedulingIgnoredDuringExecution:
+#             nodeSelectorTerms:
+#             - matchExpressions:
+#               - key: disktype
+#                 operator: In
+#                 values:
+#                 - ssd
+#         podAntiAffinity:
+#           requiredDuringSchedulingIgnoredDuringExecution:
+#           - labelSelector:
+#               matchLabels:
+#                 app: ecommerce
+#             topologyKey: "kubernetes.io/hostname"
+
+#       tolerations:
+#       - key: "team"
+#         operator: "Equal"
+#         value: "backend"
+#         effect: "NoSchedule"
+
+#       terminationGracePeriodSeconds: 30
+
+
+
+
+
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ecommerce-secret
+  namespace: prod
+
+type: Opaque
+
+data:
+  DB_USER: c2FudGhvc2g=        # "santhosh"
+  DB_PASSWORD: cGFzc3dvcmQ=    # "password"
+  API_KEY: YWJjZGVmZw==        # "abcdefg"
+
