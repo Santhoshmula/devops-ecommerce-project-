@@ -1,11 +1,11 @@
 {
-  "name": "ecommerce-frontend",
+  "name": "ecommerce-app",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "prom-client": "^14.0.0"
+    "prom-client": "^14.2.0"
   }
 }
