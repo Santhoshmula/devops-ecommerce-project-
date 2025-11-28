@@ -1,25 +1,25 @@
-// metrics.js
-const client = require('prom-client');
+const http = require("http");
+const client = require("prom-client");
 
-// collect Node.js default metrics (CPU, memory, event loop, gc, etc)
-client.collectDefaultMetrics({ timeout: 5000 });
+client.collectDefaultMetrics();
 
-// Create a counter and a histogram example
-const httpRequestsTotal = new client.Counter({
-  name: 'http_requests_total',
-  help: 'Total number of HTTP requests',
-  labelNames: ['method', 'route', 'status']
+const requestCount = new client.Counter({
+  name: "http_requests_total",
+  help: "Total HTTP requests",
+  labelNames: ["method", "path"]
 });
 
-const httpRequestDurationSeconds = new client.Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'Duration of HTTP requests in seconds',
-  labelNames: ['method', 'route', 'status'],
-  buckets: [0.005,0.01,0.025,0.05,0.1,0.3,0.5,1,2,5] // tune for your app
+const server = http.createServer(async (req, res) => {
+  if (req.url === "/metrics") {
+    res.writeHead(200, { "Content-Type": client.register.contentType });
+    res.end(await client.register.metrics());
+    return;
+  }
+
+  requestCount.inc({ method: req.method, path: req.url });
+
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ msg: "Hello", version: "v1" }));
 });
 
-module.exports = {
-  client,
-  httpRequestsTotal,
-  httpRequestDurationSeconds
-};
+server.listen(3000);
