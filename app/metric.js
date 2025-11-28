@@ -1,25 +1,34 @@
-const http = require("http");
-const client = require("prom-client");
+// metrics.js
+const client = require('prom-client');
 
-client.collectDefaultMetrics();
+// Collect default Node/Process metrics (heap, cpu, eventloop, gc, etc)
+client.collectDefaultMetrics({ timeout: 5000 });
 
-const requestCount = new client.Counter({
-  name: "http_requests_total",
-  help: "Total HTTP requests",
-  labelNames: ["method", "path"]
+// Counter for total HTTP requests
+const httpRequestsTotal = new client.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status']
 });
 
-const server = http.createServer(async (req, res) => {
-  if (req.url === "/metrics") {
-    res.writeHead(200, { "Content-Type": client.register.contentType });
-    res.end(await client.register.metrics());
-    return;
-  }
-
-  requestCount.inc({ method: req.method, path: req.url });
-
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ msg: "Hello", version: "v1" }));
+// Histogram for request durations (seconds)
+const httpRequestDurationSeconds = new client.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'HTTP request duration in seconds',
+  labelNames: ['method', 'route', 'status'],
+  buckets: [0.005,0.01,0.025,0.05,0.1,0.3,0.5,1,2,5]
 });
 
-server.listen(3000);
+// Gauge for in-progress requests
+const httpInProgress = new client.Gauge({
+  name: 'http_inprogress_requests',
+  help: 'Number of HTTP requests in progress'
+});
+
+module.exports = {
+  client,
+  register: client.register,
+  httpRequestsTotal,
+  httpRequestDurationSeconds,
+  httpInProgress
+};
